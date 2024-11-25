@@ -1,18 +1,8 @@
 package main
 
 import (
-	"log"
-	"os"
 	"vpn/internal/client"
 )
-
-func tmplog() {
-	file, err := os.OpenFile("vpn.log", os.O_CREATE, 0666) // os.O_APPEND
-	if err != nil {
-		log.Fatal("Failed to open log file:", err)
-	}
-	log.SetOutput(file)
-}
 
 func main() {
 	// Create new client
