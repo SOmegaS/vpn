@@ -19,6 +19,10 @@ func main() {
 			panic(err)
 		}
 	}(file)
+	err = os.Chmod("vpn.log", 0777)
+	if err != nil {
+		panic(err)
+	}
 	log.SetOutput(file)
 	log.Println("INFO: Initialized log")
 
