@@ -12,6 +12,7 @@ import (
 type Client struct {
 	iface *tun.Interface
 	vpn   *vpn.Connector
+	sym   bool
 }
 
 func (c *Client) upIface() error {
@@ -47,7 +48,8 @@ func (c *Client) Init() error {
 	if err != nil {
 		return fmt.Errorf("failed to resolve NAT type: %v", err)
 	}
-	if sym {
+	c.sym = sym
+	if c.sym {
 		fmt.Println("You have symmetric nat (((")
 	} else {
 		fmt.Println("Congrats! You have not Symmetric NAT")
