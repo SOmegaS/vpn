@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 	"vpn/internal/tun"
 	"vpn/internal/vpn"
 )
+
+const BuffSize int = 65535 // UDP packet max size
 
 type Client struct {
 	iface *tun.Interface
@@ -103,19 +104,45 @@ func (c *Client) Connect() error {
 }
 
 func (c *Client) Serve() error {
-	// TODO
-	for range 10 {
-		c.vpn.SendAll([]byte("HellO!!"))
-		select {
-		case buff := <-c.vpn.Input:
-			log.Println("INFO: Received message")
-			fmt.Println(string(buff))
-		default:
-			log.Println("INFO: Nothing received")
+	finish := make(chan error)
+
+	go func() {
+		buff := make([]byte, BuffSize)
+		log.Println("INFO: Serve TUN")
+		for {
+			log.Println("INFO: Reading from TUN")
+			n, err := c.iface.Read(buff)
+			if err != nil {
+				finish <- fmt.Errorf("failed to read from TUN: %v", err)
+				return
+			}
+			log.Println("INFO: Read from TUN")
+
+			log.Println("INFO: Sending to all")
+			c.vpn.SendAll(buff[:n])
+			log.Println("INFO: Sent to all")
 		}
-		time.Sleep(1000 * time.Millisecond)
-	}
-	return nil
+	}()
+
+	go func() {
+		log.Println("INFO: Serving connection")
+		for {
+			log.Println("INFO: Waiting message")
+			buff := <-c.vpn.Input
+			log.Println("INFO: Received message")
+
+			log.Println("INFO: Writing to TUN")
+			_, err := c.iface.Write(buff)
+			if err != nil {
+				finish <- fmt.Errorf("failed to write to TUN: %v", err)
+				return
+			}
+			log.Println("INFO: Written to TUN")
+		}
+	}()
+
+	err := <-finish
+	return err
 }
 
 func NewClient() (*Client, error) {

@@ -126,13 +126,13 @@ func (c *Connector) Connect(iaddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
 	log.Println("INFO: Starting keep-alive ping")
 	go func() {
 		for {
+			time.Sleep(15 * time.Second) // TODO подобрать время
 			log.Println("INFO: Sending keep-alive to", conn.RemoteAddr())
 			_, err := conn.Write([]byte("keep-alive"))
 			if err != nil {
 				return
 			}
 			log.Println("INFO: Sent keep-alive to", conn.RemoteAddr())
-			time.Sleep(15 * time.Second) // TODO подобрать время
 		}
 	}()
 	c.conns = append(c.conns, conn)
