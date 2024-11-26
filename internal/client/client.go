@@ -145,6 +145,31 @@ func (c *Client) Serve() error {
 	return err
 }
 
+func (c *Client) Listen() error {
+	// Specify local port
+	log.Println("INFO: Specifying listening port")
+	var iaddr *net.UDPAddr
+	err := fmt.Errorf("")
+	for err != nil {
+		fmt.Print("Specify port or empty for random: ")
+		var port string
+		_, _ = fmt.Scanln(&port)
+		iaddr, err = net.ResolveUDPAddr("udp", ":"+port)
+	}
+	log.Println("INFO: Listening port specified")
+
+	log.Println("INFO: Listening for connection")
+	conn, err := c.vpn.Listen(iaddr)
+	if err != nil {
+		return fmt.Errorf("failed to connect to host: %v", err)
+	}
+	log.Println("INFO: Connected host")
+
+	fmt.Printf("Host %v connected to port %v\n", conn.RemoteAddr(), conn.LocalAddr().(*net.UDPAddr).Port)
+	log.Printf("INFO: Host %v connected to port %v\n", conn.RemoteAddr(), conn.LocalAddr().(*net.UDPAddr).Port)
+	return nil
+}
+
 func NewClient() (*Client, error) {
 	// Create TUN-interface
 	log.Println("INFO: Creating TUN interface")
