@@ -15,13 +15,15 @@ type Interface struct {
 // NewInterface creates TUN-interface. Requires sudo rights
 func NewInterface() (*Interface, error) {
 	// Create TUN-interface
-	log.Println("INFO: Create TUN-interface")
+	log.Println("INFO: Creating (parent) TUN-interface")
 	tun, err := water.New(water.Config{
 		DeviceType: water.TUN,
 	})
 	if err != nil {
 		return nil, err
 	}
+	log.Println("INFO: (parent) TUN-interface created")
+
 	return &Interface{
 		Interface: tun,
 	}, nil
@@ -31,16 +33,19 @@ func NewInterface() (*Interface, error) {
 func (i *Interface) SetIp(ip, mask string) error {
 	// IP doesn't change
 	if i.Ip == ip {
+		log.Println("INFO: IP is the same")
 		return nil
 	}
 
 	// Delete IP if exists
 	if i.Ip != "" {
+		log.Println("INFO: Deleting previous ip")
 		err := exec.Command("ip", "addr", "del", i.Ip+mask, "dev", i.Interface.Name()).Run()
 		if err != nil {
 			return fmt.Errorf("failed to remove ip from TUN-interface: %v", err)
 		}
 		i.Ip = ""
+		log.Println("INFO: Removed previous ip")
 	}
 
 	// Add IP
@@ -50,6 +55,7 @@ func (i *Interface) SetIp(ip, mask string) error {
 		return fmt.Errorf("failed to add ip to TUN-interface: %v", err)
 	}
 	i.Ip = ip
+	log.Println("INFO: Added ip")
 	return nil
 }
 
