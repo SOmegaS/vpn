@@ -101,7 +101,8 @@ func (c *Connector) handshake(conn *net.UDPConn) error {
 	return nil
 }
 
-func (c *Connector) connect(iaddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
+func (c *Connector) Connect(iaddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
+	log.Println("INFO: Connecting to", raddr)
 	log.Printf("INFO: Dial from %v to %v\n", iaddr, raddr)
 	conn, err := net.DialUDP("udp", iaddr, raddr)
 	if err != nil {
@@ -120,37 +121,6 @@ func (c *Connector) connect(iaddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
 	go c.handler(conn)
 	c.conns = append(c.conns, conn)
 	return conn, nil
-}
-
-func (c *Connector) Listen(iaddr *net.UDPAddr) (*net.UDPConn, error) {
-	log.Println("INFO: Listening on", iaddr)
-	conn, err := net.ListenUDP("udp", iaddr)
-	if err != nil {
-		return nil, err
-	}
-	log.Println("INFO: Created listener on", conn.LocalAddr())
-
-	log.Println("INFO: Waiting connection on", conn.LocalAddr())
-	_, raddr, err := conn.ReadFromUDP(nil)
-	if err != nil {
-		return nil, err
-	}
-	log.Println("INFO: Received connection from", raddr)
-
-	log.Println("INFO: Closing listener on", conn.LocalAddr())
-	err = conn.Close()
-	if err != nil {
-		return nil, err
-	}
-	log.Println("INFO: Listener closed on", conn.LocalAddr())
-
-	log.Printf("INFO: Connecting from %v to %v\n", iaddr, raddr)
-	return c.connect(iaddr, raddr)
-}
-
-func (c *Connector) Connect(raddr *net.UDPAddr) (*net.UDPConn, error) {
-	log.Println("INFO: Connecting to", raddr)
-	return c.connect(nil, raddr)
 }
 
 func NewConnector() (*Connector, error) {

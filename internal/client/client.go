@@ -66,36 +66,22 @@ func (c *Client) Init() error {
 	return nil
 }
 
-func (c *Client) Listen() error {
-	// Specify local port
-	log.Println("INFO: Specifying listening port")
+func (c *Client) Connect() error {
+	log.Println("INFO: Choosing local port")
 	var iaddr *net.UDPAddr
 	err := fmt.Errorf("")
 	for err != nil {
-		fmt.Print("Specify port or empty for random: ")
+		fmt.Print("Specify port: ")
 		var port string
 		_, _ = fmt.Scanln(&port)
 		iaddr, err = net.ResolveUDPAddr("udp", ":"+port)
 	}
-	log.Println("INFO: Listening port specified")
+	log.Println("INFO: Chosen local port")
 
-	log.Println("INFO: Listening for connection")
-	conn, err := c.vpn.Listen(iaddr)
-	if err != nil {
-		return fmt.Errorf("failed to connect to host: %v", err)
-	}
-	log.Println("INFO: Connected host")
-
-	fmt.Printf("Host %v connected to port %v\n", conn.RemoteAddr(), conn.LocalAddr().(*net.UDPAddr).Port)
-	log.Printf("INFO: Host %v connected to port %v\n", conn.RemoteAddr(), conn.LocalAddr().(*net.UDPAddr).Port)
-	return nil
-}
-
-func (c *Client) Connect() error {
 	// Connect to another host
 	log.Println("INFO: Choosing host address")
 	var raddr *net.UDPAddr
-	err := fmt.Errorf("")
+	err = fmt.Errorf("")
 	for err != nil {
 		fmt.Print("Type address to connect to (ip:port): ")
 		var ip string
@@ -105,7 +91,7 @@ func (c *Client) Connect() error {
 	log.Println("INFO: Chosen host address")
 
 	log.Println("INFO: Connecting to host")
-	conn, err := c.vpn.Connect(raddr)
+	conn, err := c.vpn.Connect(iaddr, raddr)
 	if err != nil {
 		return fmt.Errorf("failed to connect to host: %v", err)
 	}
