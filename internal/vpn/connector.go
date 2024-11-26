@@ -38,6 +38,10 @@ func (c *Connector) handler(conn *net.UDPConn) {
 			log.Printf("INFO: Connection to %v closed\n", conn.RemoteAddr())
 			return
 		}
+		if string(buff[:n]) == "keep-alive" {
+			log.Println("INFO: Received keep-alive from", conn.RemoteAddr())
+			continue
+		}
 		c.Input <- buff[:n]
 		log.Println("INFO: Read message from", conn.RemoteAddr())
 	}
@@ -119,6 +123,18 @@ func (c *Connector) Connect(iaddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
 
 	log.Println("INFO: Staring handler", conn.RemoteAddr())
 	go c.handler(conn)
+	log.Println("INFO: Starting keep-alive ping")
+	go func() {
+		for {
+			log.Println("INFO: Sending keep-alive to", conn.RemoteAddr())
+			_, err := conn.Write([]byte("keep-alive"))
+			if err != nil {
+				return
+			}
+			log.Println("INFO: Sent keep-alive to", conn.RemoteAddr())
+			time.Sleep(15 * time.Second) // TODO подобрать время
+		}
+	}()
 	c.conns = append(c.conns, conn)
 	return conn, nil
 }
