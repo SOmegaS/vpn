@@ -38,6 +38,10 @@ func (c *Connector) handler(conn *net.UDPConn) {
 			log.Printf("INFO: Connection to %v closed\n", conn.RemoteAddr())
 			return
 		}
+		if string(buff[:n]) == "keep-alive" {
+			log.Println("INFO: Received keep-alive from", conn.RemoteAddr())
+			continue
+		}
 		c.Input <- buff[:n]
 		log.Println("INFO: Read message from", conn.RemoteAddr())
 	}
@@ -119,8 +123,46 @@ func (c *Connector) Connect(iaddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
 
 	log.Println("INFO: Staring handler", conn.RemoteAddr())
 	go c.handler(conn)
+	log.Println("INFO: Starting keep-alive ping")
+	go func() {
+		for {
+			time.Sleep(5 * time.Second) // TODO подобрать время
+			log.Println("INFO: Sending keep-alive to", conn.RemoteAddr())
+			_, err := conn.Write([]byte("keep-alive"))
+			if err != nil {
+				return
+			}
+			log.Println("INFO: Sent keep-alive to", conn.RemoteAddr())
+		}
+	}()
 	c.conns = append(c.conns, conn)
 	return conn, nil
+}
+
+func (c *Connector) Listen(iaddr *net.UDPAddr) (*net.UDPConn, error) {
+	log.Println("INFO: Listening on", iaddr)
+	conn, err := net.ListenUDP("udp", iaddr)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("INFO: Created listener on", conn.LocalAddr())
+
+	log.Println("INFO: Waiting connection on", conn.LocalAddr())
+	_, raddr, err := conn.ReadFromUDP(nil)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("INFO: Received connection from", raddr)
+
+	log.Println("INFO: Closing listener on", conn.LocalAddr())
+	err = conn.Close()
+	if err != nil {
+		return nil, err
+	}
+	log.Println("INFO: Listener closed on", conn.LocalAddr())
+
+	log.Printf("INFO: Connecting from %v to %v\n", iaddr, raddr)
+	return c.Connect(iaddr, raddr)
 }
 
 func NewConnector() (*Connector, error) {

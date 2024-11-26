@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 	"vpn/internal/tun"
 	"vpn/internal/vpn"
 )
+
+const BuffSize int = 65535 // UDP packet max size
 
 type Client struct {
 	iface *tun.Interface
@@ -103,18 +104,69 @@ func (c *Client) Connect() error {
 }
 
 func (c *Client) Serve() error {
-	// TODO
-	for range 10 {
-		c.vpn.SendAll([]byte("HellO!!"))
-		select {
-		case buff := <-c.vpn.Input:
-			log.Println("INFO: Received message")
-			fmt.Println(string(buff))
-		default:
-			log.Println("INFO: Nothing received")
+	finish := make(chan error)
+
+	go func() {
+		buff := make([]byte, BuffSize)
+		log.Println("INFO: Serve TUN")
+		for {
+			log.Println("INFO: Reading from TUN")
+			n, err := c.iface.Read(buff)
+			if err != nil {
+				finish <- fmt.Errorf("failed to read from TUN: %v", err)
+				return
+			}
+			log.Println("INFO: Read from TUN")
+
+			log.Println("INFO: Sending to all")
+			c.vpn.SendAll(buff[:n])
+			log.Println("INFO: Sent to all")
 		}
-		time.Sleep(1000 * time.Millisecond)
+	}()
+
+	go func() {
+		log.Println("INFO: Serving connection")
+		for {
+			log.Println("INFO: Waiting message")
+			buff := <-c.vpn.Input
+			log.Println("INFO: Received message")
+
+			log.Println("INFO: Writing to TUN")
+			_, err := c.iface.Write(buff)
+			if err != nil {
+				finish <- fmt.Errorf("failed to write to TUN: %v", err)
+				return
+			}
+			log.Println("INFO: Written to TUN")
+		}
+	}()
+
+	err := <-finish
+	return err
+}
+
+func (c *Client) Listen() error {
+	// Specify local port
+	log.Println("INFO: Specifying listening port")
+	var iaddr *net.UDPAddr
+	err := fmt.Errorf("")
+	for err != nil {
+		fmt.Print("Specify port or empty for random: ")
+		var port string
+		_, _ = fmt.Scanln(&port)
+		iaddr, err = net.ResolveUDPAddr("udp", ":"+port)
 	}
+	log.Println("INFO: Listening port specified")
+
+	log.Println("INFO: Listening for connection")
+	conn, err := c.vpn.Listen(iaddr)
+	if err != nil {
+		return fmt.Errorf("failed to connect to host: %v", err)
+	}
+	log.Println("INFO: Connected host")
+
+	fmt.Printf("Host %v connected to port %v\n", conn.RemoteAddr(), conn.LocalAddr().(*net.UDPAddr).Port)
+	log.Printf("INFO: Host %v connected to port %v\n", conn.RemoteAddr(), conn.LocalAddr().(*net.UDPAddr).Port)
 	return nil
 }
 

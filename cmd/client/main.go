@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"vpn/internal/client"
@@ -42,10 +43,27 @@ func main() {
 	log.Println("INFO: Initialized client")
 
 	// Connect to another user
-	log.Println("INFO: Mode connect")
-	err = c.Connect()
+	log.Println("INFO: Choosing mode")
+	fmt.Println("Choose mode (listen, connect): ")
+	var mode string
+	_, err = fmt.Scanln(&mode)
 	if err != nil {
 		log.Panic(err)
+	}
+	if mode == "listen" {
+		log.Println("INFO: Mode listen")
+		err = c.Listen()
+		if err != nil {
+			log.Panic(err)
+		}
+	} else if mode == "connect" {
+		log.Println("INFO: Mode connect")
+		err = c.Connect()
+		if err != nil {
+			log.Panic(err)
+		}
+	} else {
+		log.Panic("wrong mode")
 	}
 	log.Println("INFO: Connected host")
 
