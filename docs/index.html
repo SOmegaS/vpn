@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SunnyVPN</title>
+  <style>
+    body {
+      background-color: #0f1219; /* Тёмный фон */
+      color: #ffffff; /* Белый текст */
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+
+ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 1rem;
+}
+
+    ul li {
+      margin-bottom: 5px;
+    }
+
+    a {
+      color: #00aaff; /* Цвет ссылки */
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rudmin</h1>
+    
+    <h2>Скачать</h2>
+    <p><a href="https://github.com/SOmegaS/vpn">Ссылка на скачивание</a></p>
+    
+    <h2>Цель проекта</h2>
+    <p>Проект создан для личного пользования с целью</p>
+    
+    <h2>Использование</h2>
+    <p>Работоспособность проверена только на Linux. На большинстве протестированных нами дистрибутивах (это Manjaro,Linux Mint и Ubuntu) достаточно просто использовать готовый файл.</p>
+    <h3>Использование готового файла</h3>
+    <ul>
+      <li>Скачать исполняемый файл</li>
+      <li>Зайти в консоль, перейти в папку загрузок</li>
+      <li>chmod +x vpn</li>
+      <li>sudo ./vpn </li>
+      <li>Следовать промптам в консоли</li>
+      <li>Если ваш NAT - Symmetric, то программа не может работать в режиме listen, только в режиме connect.  <a href="https://www.checkmynat.com/">Определить тип NAT</a></p></li>
+    </ul>
+    
+    <h3>Самостоятельная сборка</h3>
+    <ul>
+      <li>Удостоверьтесь, что у вас стоит Go.</li>
+      <li>Склонируйте репозиторий</li>
+      <li>CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC=x86_64-linux-gnu-gcc go build -o vpn ~/cmd/client/main.go</li>
+    </ul>
+    <h2>Разработчикам</h2>
+    <p> Что делает та или иная функция, можно понять, если посмотреть на то, что выводится в логах в соответвующих функциях</p>
+    <h2>Troubleshooting</h2>
+    Известные проблемы:
+    <ul>
+      <li>В текущей версии существуют проблемы с подключением двух типов пар NAT: Symmetric-Symmetric и Symmetric-Port-Restricted</li>
+    </ul>
+    <h2>Команда</h2>
+    <ul>
+      <li>Горшков Александр - реализация MVP</li>
+      <li>Ширяев Павел - сделал этот сайт, подготовил документацию, общая поддержка</li>
+      <li>Сахаров Даниэль - общая поддержка</li>
+    </ul>
+  </div>
+</body>
+</html>
+
