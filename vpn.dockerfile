@@ -34,6 +34,8 @@ RUN go version
 
 COPY . ./
 
+EXPOSE 12345
+
 #RUN [ -c /dev/net/tun ] || (echo "TUN device not available" && exit 1)
 
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC=x86_64-linux-gnu-gcc go build -o vpn ~/cmd/client/main.go
