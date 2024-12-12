@@ -34,7 +34,9 @@ RUN go version
 
 COPY . ./
 
-EXPOSE 12345
+ARG PORT=12345
+
+EXPOSE ${PORT}
 
 #RUN [ -c /dev/net/tun ] || (echo "TUN device not available" && exit 1)
 

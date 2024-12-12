@@ -14,8 +14,12 @@ if [[ $1 == "start" ]]; then
     echo "Building Docker image..."
     docker build -f vpn.dockerfile --tag vpn_ubuntu_all_files_include .
 
+    read -p "Сhoose a port to open later: " port
+    port=${port:-12345}
+    
+    export PORT=$port
     echo "Starting Docker container..."
-    docker run --privileged --network host --device /dev/net/tun --name vpn_container -it vpn_ubuntu_all_files_include
+    docker run --cap-add=NET_ADMIN --cap-add=NET_RAW  --network host --device /dev/net/tun -e PORT=$PORT --name vpn_container -it vpn_ubuntu_all_files_include
     
     docker wait vpn_container
     
