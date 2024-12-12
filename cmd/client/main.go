@@ -44,11 +44,13 @@ func main() {
 
 	// Connect to another user
 	log.Println("INFO: Choosing mode")
-	fmt.Println("Choose mode (listen, connect): ")
 	var mode string
-	_, err = fmt.Scanln(&mode)
-	if err != nil {
-		log.Panic(err)
+	for mode != "listen" && mode != "connect" {
+		fmt.Println("Choose mode (listen, connect): ")
+		_, err = fmt.Scanln(&mode)
+		if err != nil {
+			log.Panic(err)
+		}
 	}
 	if mode == "listen" {
 		log.Println("INFO: Mode listen")
@@ -62,8 +64,6 @@ func main() {
 		if err != nil {
 			log.Panic(err)
 		}
-	} else {
-		log.Panic("wrong mode")
 	}
 	log.Println("INFO: Connected host")
 
