@@ -147,6 +147,14 @@ func (c *Connector) Listen(iaddr *net.UDPAddr) (*net.UDPConn, error) {
 	}
 	log.Println("INFO: Created listener on", conn.LocalAddr())
 
+	log.Println("INFO: Sending packet to open port")
+	addr, _ := net.ResolveUDPAddr("udp", "8.8.8.8:8000")
+	_, err = conn.WriteTo([]byte{}, addr)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("INFO: Sent packet to open port")
+
 	log.Println("INFO: Waiting connection on", conn.LocalAddr())
 	_, raddr, err := conn.ReadFromUDP(nil)
 	if err != nil {
