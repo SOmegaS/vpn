@@ -19,7 +19,7 @@ if [[ $1 == "start" ]]; then
     
     export PORT=$port
     echo "Starting Docker container..."
-    docker run --cap-add=NET_ADMIN --cap-add=NET_RAW  --network host --device /dev/net/tun -e PORT=$PORT --name vpn_container -it vpn_ubuntu_all_files_include
+    docker run --privileged --network host --device /dev/net/tun -e PORT=$PORT --name vpn_container -it vpn_ubuntu_all_files_include
     
     docker wait vpn_container
     
