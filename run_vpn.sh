@@ -25,7 +25,15 @@ if [[ $1 == "start" ]]; then
     
     cleanup
 
+elif [[ $1 == "clear-cache" ]]; then
+    echo "Removing Docker image and clearing cache..."
+    docker rmi vpn_ubuntu_all_files_include >/dev/null 2>&1 
+    
+    docker image prune -a -f
+    
+    echo "Cache cleared."
+
 else
-    echo "Usage: $0 start"
+    echo "Usage: $0 {start|clear-cache}"
 fi
 
